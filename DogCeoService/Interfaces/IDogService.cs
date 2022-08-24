@@ -13,7 +13,7 @@ namespace DogCeoService.Interfaces
         /// <param name="countPicturesEveryBread">кол-во картинок для каждой из пород</param>
         /// <param name="breedsFilter">список пород, по которым нужно получить изображения, если null, получаем по всем породам</param>
         /// <returns>список пород с картинками и ссылками</returns>
-        Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBread, List<string>? breedsFilter = null);
+        Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBread, CancellationToken token, List<string>? breedsFilter = null);
 
         /// <summary>
         /// Получаем список всех пород
@@ -29,7 +29,7 @@ namespace DogCeoService.Interfaces
         /// <param name="bread">строковое имя породы</param>
         /// <param name="countPicturesEveryBreed">кол-во изображений для породы</param>
         /// <returns>Получаем породу, с содержанием ссылок на картинки и сами картинки</returns>
-        Task<DogDto> GetDogAsync(string bread, int countPicturesEveryBreed);
+        Task<DogDto> GetDogAsync(string bread, int countPicturesEveryBreed, CancellationToken token);
 
         /// <summary>
         /// получаем список пород согласно фильтра

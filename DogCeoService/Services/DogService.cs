@@ -38,7 +38,7 @@ namespace DogCeoService.Services
                 : GetSelectedDogNames(breeds, breedsFilter);
         }
 
-        public async Task<DogDto> GetDogAsync(string breed, int countPicturesEveryBreed)
+        public async Task<DogDto> GetDogAsync(string breed, int countPicturesEveryBreed, CancellationToken token)
         {
             var dog = new DogDto();
             dog.Breed = breed;
@@ -63,23 +63,23 @@ namespace DogCeoService.Services
 
             var dataItems = new BlockingCollection<DogPictureDto>();
             int count = 0;
-            var tasks = dogUrls?
-                .AsParallel()
-                .Select(async item =>
-                {
-                    dataItems.Add(new DogPictureDto()
-                    {
-                        Dog = dog,
-                        Url = item,
-                        Picture = await httpClient.GetByteArrayAsync(item)
-                    });
+            //var tasks = dogUrls?
+            //    .AsParallel()
+            //    .Select(async item =>
+            //    {
+            //        dataItems.Add(new DogPictureDto()
+            //        {
+            //            Dog = dog,
+            //            Url = item,
+            //            Picture = await httpClient.GetByteArrayAsync(item)
+            //        });
 
-                    count++;
-                });
+            //        count++;
+            //    });
 
-            if (tasks != null)
-                await Task.WhenAll(tasks);
-            /*foreach (var item in dogUrls)
+            //if (tasks != null)
+            //    await Task.WhenAll(tasks);
+            foreach (var item in dogUrls)
             {
                 dataItems.Add(new DogPictureDto()
                 {
@@ -89,14 +89,17 @@ namespace DogCeoService.Services
                 });
 
                 count++;
-            }*/
+
+                if (token.IsCancellationRequested)
+                    break;
+            }
 
             dog.DogPictures = dataItems.ToList();
 
             return dog;
         }
 
-        public async Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBreed, List<string>? breedsFilter = null)
+        public async Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBreed, CancellationToken token, List<string>? breedsFilter = null)
         {
             var dogs = new List<DogDto>();
             var httpClient = _httpClientFactory.CreateClient("DogCeoService");
@@ -121,8 +124,11 @@ namespace DogCeoService.Services
                 return dogs;
             foreach (var item in breeds)
             {
-                var dog = await GetDogAsync(item, countPicturesEveryBreed);
+                var dog = await GetDogAsync(item, countPicturesEveryBreed, token);
                 dogs.Add(dog);
+
+                if (token.IsCancellationRequested)
+                    break;
             }
 
             return dogs;

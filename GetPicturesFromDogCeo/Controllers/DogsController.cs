@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 using DogCeoService.Interfaces;
 
@@ -30,10 +31,10 @@ namespace GetPicturesFromDogCeo.Controllers
                 return BadRequest();
             }
 
-            var dogs = await _dogService.GetDogsAsync(dogsQueryViewModel.Count, dogsQueryViewModel.Breads);
+            var dogs = await _dogService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
             await _dogWebService.AddDogsToCachAsync(dogs);
 
-            return Ok(dogs);
+            return Ok();
         }
     }
 }
