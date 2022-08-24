@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DogCeoService.EntitiesDto
+﻿namespace DogCeoService.EntitiesDto
 {
     public class DogPictureDto
     {
-        public DogDto Dog { get; set; }
-        public string Url { get; set; }
-        public byte[] Picture { get; set; }
+        public DogDto? Dog { get; set; }
+        public string? Url { get; set; }
+        public byte[]? Picture { get; set; }
     }
 }

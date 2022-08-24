@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Net;
 using System.Text.Json;
 
 using DogCeoService.EntitiesDto;
@@ -19,108 +18,124 @@ namespace DogCeoService.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<IEnumerable<string>?> GetBreadsAsync(string? dogsJson, List<string>? breadsFilter = null)
+        public async Task<IEnumerable<string>> GetBreadsFromJsonAsync(string? dogsJson, List<string>? breedsFilter = null)
         {
-            var breads = string.IsNullOrWhiteSpace(dogsJson)
-                ? null
+            var breeds = string.IsNullOrWhiteSpace(dogsJson)
+                ? throw new DogCeoException("Отсутствуют входные данные")
                 : await Task.Run(() =>
                 {
-                    JToken node = JToken.Parse(dogsJson)["message"];
+                    var node = JToken.Parse(dogsJson)["message"];
 
-                    List<string> breads = new List<string>();
-                    List<string> name = new List<string>();
+                    var dogBreeds = new List<string>();
+                    var name = new List<string>();
 
-                    WalkNode(node, breads, name);
-                    return breads;
+                    WalkNode(node, dogBreeds, name);
+                    return dogBreeds;
                 });
 
-            return breads == null 
-                ? null
-                :GetSelectedDogNames(breads, breadsFilter);
+            return breeds == null
+                ? throw new DogCeoException("Не удалось получить породы собак")
+                : GetSelectedDogNames(breeds, breedsFilter);
         }
 
-        public async Task<DogDto> GetDogAsync(string bread)
+        public async Task<DogDto> GetDogAsync(string breed, int countPicturesEveryBreed)
         {
             var dog = new DogDto();
-            dog.Bread = bread;
+            dog.Breed = breed;
             var httpClient = _httpClientFactory.CreateClient("DogCeoService");
-            var response = await httpClient.GetAsync($"breed{bread}/images");
-            if (response.IsSuccessStatusCode)
+            var response = await httpClient.GetAsync($"breed{breed}/images");
+
+            if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsByteArrayAsync();
-                var options = new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                var result1 = JsonSerializer.Deserialize<Rootobject>(content, options);
-
-                var dataItems = new BlockingCollection<DogPictureDto>();
-                int count = 0;
-                var tasks = result1?.message
-                    .AsParallel()
-                    .Select(async item =>
-                    {
-                        dataItems.Add(new DogPictureDto()
-                        {
-                            Dog = dog,
-                            Url = item,
-                            Picture = await httpClient.GetByteArrayAsync(item)
-                        });
-
-                        count++;
-                    });
-                
-                if (tasks != null)
-                    await Task.WhenAll(tasks);
-                dog.DogPictures = dataItems.ToList();
+                throw new DogCeoException("Ошибка при обращении на сервер https://dog.ceo");
             }
+
+            var content = await response.Content.ReadAsByteArrayAsync();
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var dogUrls = JsonSerializer.Deserialize<DogPictureUrls>(content, options)?.message?.Take(countPicturesEveryBreed);
+
+            if (dogUrls == null)
+                throw new DogCeoException("Не удалось получить ссылки на изображения");
+
+            var dataItems = new BlockingCollection<DogPictureDto>();
+            int count = 0;
+            var tasks = dogUrls?
+                .AsParallel()
+                .Select(async item =>
+                {
+                    dataItems.Add(new DogPictureDto()
+                    {
+                        Dog = dog,
+                        Url = item,
+                        Picture = await httpClient.GetByteArrayAsync(item)
+                    });
+
+                    count++;
+                });
+
+            if (tasks != null)
+                await Task.WhenAll(tasks);
+            /*foreach (var item in dogUrls)
+            {
+                dataItems.Add(new DogPictureDto()
+                {
+                    Dog = dog,
+                    Url = item,
+                    Picture = await httpClient.GetByteArrayAsync(item)
+                });
+
+                count++;
+            }*/
+
+            dog.DogPictures = dataItems.ToList();
 
             return dog;
         }
 
-        public async Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBread, List<string>? breadsFilter = null)
+        public async Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBreed, List<string>? breedsFilter = null)
         {
             var dogs = new List<DogDto>();
             var httpClient = _httpClientFactory.CreateClient("DogCeoService");
-            var response = await httpClient.GetAsync(
-            "breeds/list/all");
-
-            if (response.IsSuccessStatusCode)
+            var response = await httpClient.GetAsync("breeds/list/all");
+            if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsByteArrayAsync();
-                var options = new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-                var result = JsonSerializer.Deserialize<object>(content, options);
-                var str = result?.ToString();
+                throw new DogCeoException("Ошибка при обращении на сервер https://dog.ceo");
+            }
 
-                var breads = await GetBreadsAsync(str, breadsFilter);
+            var content = await response.Content.ReadAsByteArrayAsync();
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = JsonSerializer.Deserialize<object>(content, options);
+            var str = result?.ToString();
 
-                
-                if (breads == null)
-                    return dogs;
-                foreach (var item in breads)
-                {
-                    var dog = await GetDogAsync(item);
-                    dogs.Add(dog);
-                }
+            var breeds = await GetBreadsFromJsonAsync(str, breedsFilter);
 
+
+            if (breeds == null)
                 return dogs;
+            foreach (var item in breeds)
+            {
+                var dog = await GetDogAsync(item, countPicturesEveryBreed);
+                dogs.Add(dog);
             }
 
             return dogs;
         }
 
-        public IEnumerable<string> GetSelectedDogNames(List<string> breads, List<string>? breadsFilter)
+        public IEnumerable<string> GetSelectedDogNames(List<string> breeds, List<string>? breedsFilter)
         {
-            if (breadsFilter == null || !breads.Any())
-                return breads;
-            List<string> result = new List<string>();
-            foreach (var item in breadsFilter)
+            if (breedsFilter == null || !breeds.Any())
+                return breeds;
+            var result = new List<string>();
+            foreach (var item in breedsFilter)
             {
-                var r = breads.Where(x => x.Trim().ToLower().Contains(item.Trim().ToLower()));
+                var r = breeds.Where(x => x.Trim().ToLower().Contains(item.Trim().ToLower()));
                 result.AddRange(r);
             }
 
@@ -132,7 +147,7 @@ namespace DogCeoService.Services
             if (node.Type == JTokenType.Object)
             {
                 var children = node.Children<JProperty>();
-                foreach (JProperty child in children)
+                foreach (var child in children)
                 {
                     name.Add(child.Name);
                     WalkNode(child.Value, list, name);
@@ -150,7 +165,7 @@ namespace DogCeoService.Services
             else if (node.Type == JTokenType.Array)                
             {
                 var children = node.Children();
-                foreach (JToken child in children)
+                foreach (var child in children)
                 {
                     name.Add(child.ToString());
                     WalkNode(child, list, name);

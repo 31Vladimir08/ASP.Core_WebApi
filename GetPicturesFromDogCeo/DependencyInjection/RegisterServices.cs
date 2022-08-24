@@ -1,6 +1,9 @@
 ﻿using DogCeoService.Interfaces;
 using DogCeoService.Services;
 
+using GetPicturesFromDogCeo.Interfaces.WebServices;
+using GetPicturesFromDogCeo.WebServices;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GetPicturesFromDogCeo.DependencyInjection
@@ -14,6 +17,7 @@ namespace GetPicturesFromDogCeo.DependencyInjection
         public static void SetServicesDJ(this IServiceCollection services)
         {
             services.AddScoped<IDogService, DogService>();
+            services.AddScoped<IDogWebService, DogWebService>();
         }
     }
 }

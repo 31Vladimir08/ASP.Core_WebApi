@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
-using System.Web.Http.Filters;
 
 using DogCeoService.Interfaces;
 
-using GetPicturesFromDogCeo.Filters;
+using GetPicturesFromDogCeo.Interfaces.WebServices;
 using GetPicturesFromDogCeo.ViewModels;
 
 using Microsoft.AspNetCore.Mvc;
@@ -11,19 +10,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace GetPicturesFromDogCeo.Controllers
 {
     [ApiController]
-    [NotImplExceptionFilter]
     [Route("api/dogs")]
     public class DogsController : ControllerBase
     {
         private readonly IDogService _dogService;
+        private readonly IDogWebService _dogWebService;
 
-        public DogsController(IDogService dogService)
+        public DogsController(IDogService dogService, IDogWebService dogWebService)
         {
             _dogService = dogService;
+            _dogWebService = dogWebService;
         }
 
         [HttpPost]
-        [NotImplExceptionFilter]
         public async Task<IActionResult> GetDogPictures([FromBody] DogsQueryViewModel dogsQueryViewModel)
         {
             if (!ModelState.IsValid)
@@ -32,7 +31,9 @@ namespace GetPicturesFromDogCeo.Controllers
             }
 
             var dogs = await _dogService.GetDogsAsync(dogsQueryViewModel.Count, dogsQueryViewModel.Breads);
-            return Ok();
+            await _dogWebService.AddDogsToCachAsync(dogs);
+
+            return Ok(dogs);
         }
     }
 }
