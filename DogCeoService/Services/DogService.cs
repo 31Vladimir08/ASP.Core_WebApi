@@ -18,6 +18,8 @@ namespace DogCeoService.Services
             _httpClientFactory = httpClientFactory;
         }
 
+        public event Action<string>? LogNotify;
+
         public async Task<IEnumerable<string>> GetBreadsFromJsonAsync(string? dogsJson, List<string>? breedsFilter = null)
         {
             var breeds = string.IsNullOrWhiteSpace(dogsJson)
@@ -62,25 +64,10 @@ namespace DogCeoService.Services
                 throw new DogCeoException("Не удалось получить ссылки на изображения");
 
             var dataItems = new BlockingCollection<DogPictureDto>();
-            int count = 0;
-            //var tasks = dogUrls?
-            //    .AsParallel()
-            //    .Select(async item =>
-            //    {
-            //        dataItems.Add(new DogPictureDto()
-            //        {
-            //            Dog = dog,
-            //            Url = item,
-            //            Picture = await httpClient.GetByteArrayAsync(item)
-            //        });
 
-            //        count++;
-            //    });
-
-            //if (tasks != null)
-            //    await Task.WhenAll(tasks);
             foreach (var item in dogUrls)
             {
+                LogNotify?.Invoke($"Загружаем изображение {dog.Breed}; URL: {item}");
                 dataItems.Add(new DogPictureDto()
                 {
                     Dog = dog,
@@ -88,8 +75,7 @@ namespace DogCeoService.Services
                     Picture = await httpClient.GetByteArrayAsync(item)
                 });
 
-                count++;
-
+                LogNotify?.Invoke($"Загружено изображение {dog.Breed}; URL: {item}");
                 if (token.IsCancellationRequested)
                     break;
             }
@@ -124,9 +110,11 @@ namespace DogCeoService.Services
                 return dogs;
             foreach (var item in breeds)
             {
+                LogNotify?.Invoke($"Загружаем изображения для {item}");
                 var dog = await GetDogAsync(item, countPicturesEveryBreed, token);
                 dogs.Add(dog);
 
+                LogNotify?.Invoke($"Загружены изображения для {item}");
                 if (token.IsCancellationRequested)
                     break;
             }

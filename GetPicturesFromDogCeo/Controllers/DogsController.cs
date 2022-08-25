@@ -14,12 +14,10 @@ namespace GetPicturesFromDogCeo.Controllers
     [Route("api/dogs")]
     public class DogsController : ControllerBase
     {
-        private readonly IDogService _dogService;
         private readonly IDogWebService _dogWebService;
 
-        public DogsController(IDogService dogService, IDogWebService dogWebService)
+        public DogsController(IDogWebService dogWebService)
         {
-            _dogService = dogService;
             _dogWebService = dogWebService;
         }
 
@@ -31,8 +29,7 @@ namespace GetPicturesFromDogCeo.Controllers
                 return BadRequest();
             }
 
-            var dogs = await _dogService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
-            await _dogWebService.AddDogsToCachAsync(dogs);
+            var dogs = await _dogWebService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
 
             return Ok();
         }

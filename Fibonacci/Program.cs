@@ -5,7 +5,7 @@ namespace Fibonacci
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var d = GetFibonacci(4, 10);
 

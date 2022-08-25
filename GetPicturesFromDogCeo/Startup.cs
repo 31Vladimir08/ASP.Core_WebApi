@@ -2,6 +2,7 @@ using System;
 
 using GetPicturesFromDogCeo.DependencyInjection;
 using GetPicturesFromDogCeo.Filters;
+using GetPicturesFromDogCeo.WebServices;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,8 +28,10 @@ namespace GetPicturesFromDogCeo
         public void ConfigureServices(IServiceCollection services)
         {
             services.SetServicesDJ();
-
             services.AddControllers();
+
+            services.AddDistributedMemoryCache();
+            services.AddSession();
 
             services.AddMvc().AddMvcOptions(options =>
             {
@@ -65,6 +68,7 @@ namespace GetPicturesFromDogCeo
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GetPicturesFromDogCeo v1"));
             }
 
+            app.UseSession();
             app.UseHttpsRedirection();
 
             app.UseRouting();

@@ -38,5 +38,10 @@ namespace DogCeoService.Interfaces
         /// <param name="breedsFilter">колекция для фильтра</param>
         /// <returns></returns>
         IEnumerable<string> GetSelectedDogNames(List<string> breeds, List<string> breedsFilter);
+
+        /// <summary>
+        /// Событие, информирующее о том, что нужно произвести запись в лог.
+        /// </summary>
+        public event Action<string> LogNotify;
     }
 }
