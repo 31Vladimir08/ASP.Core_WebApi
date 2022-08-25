@@ -22,16 +22,16 @@ namespace GetPicturesFromDogCeo.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetDogPictures([FromBody] DogsQueryViewModel dogsQueryViewModel)
+        public IActionResult GetDogPictures([FromBody] DogsQueryViewModel dogsQueryViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var dogs = await _dogWebService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
+            _dogWebService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
 
-            return Ok();
+            return Ok(new { Status = "run" });
         }
     }
 }
