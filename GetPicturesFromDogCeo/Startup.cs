@@ -1,17 +1,17 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using GetPicturesFromDogCeo.DependencyInjection;
+using GetPicturesFromDogCeo.Filters;
+using GetPicturesFromDogCeo.WebServices;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+
+using Polly;
 
 namespace GetPicturesFromDogCeo
 {
@@ -27,12 +27,35 @@ namespace GetPicturesFromDogCeo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.SetServicesDJ();
             services.AddControllers();
+
+            services.AddDistributedMemoryCache();
+            services.AddSession();
+
+            services.AddMvc().AddMvcOptions(options =>
+            {
+                options.Filters.Add<NotImplExceptionFilterAttribute>();
+                options.Filters.Add<LogingCallsActionFilter>();
+            });
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration["RedisConnection"];
+                options.InstanceName = "SampleInstance";
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GetPicturesFromDogCeo", Version = "v1" });
             });
+
+            services
+                .AddHttpClient("DogCeoService", config =>
+                {
+                    config.BaseAddress = new Uri(Configuration["Services:DogCeo"]);
+                })
+                .AddTransientHttpErrorPolicy(x => x.WaitAndRetryAsync(2, _ => TimeSpan.FromSeconds(3)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +68,7 @@ namespace GetPicturesFromDogCeo
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GetPicturesFromDogCeo v1"));
             }
 
+            app.UseSession();
             app.UseHttpsRedirection();
 
             app.UseRouting();
