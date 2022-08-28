@@ -123,6 +123,7 @@ namespace DogCeoService.Services
             return dogs;
         }
 
+        // TODO Можно попробовать в дальнейшем отрефакторить код.
         public IEnumerable<string> GetSelectedDogNames(List<string> breeds, List<string>? breedsFilter)
         {
             if (breedsFilter == null || !breedsFilter.Any())
@@ -132,10 +133,15 @@ namespace DogCeoService.Services
             {
                 var r = breeds.Where(x => x.Trim().ToLower().Contains(item.Trim().ToLower()));
 
-                result.AddRange(r);
+                foreach (var dog in r)
+                {
+                    result.RemoveAll(x => x.Trim().ToLower().Contains(dog.Trim().ToLower()));
+
+                    result.Add(dog);
+                }
             }
 
-            return result.Distinct();
+            return result;
         }
 
         private void WalkNode(JToken node, List<string> list, List<string> name)
