@@ -26,8 +26,8 @@ namespace GetPicturesFromDogCeo.Controllers
             {
                 return BadRequest();
             }
-            int i = 1;
-            var isRun = _dogWebHostService.StartEventExecute(dogsQueryViewModel, null);
+
+            var isRun = _dogWebHostService.StartEventExecute(dogsQueryViewModel);
             return isRun
                 ? Ok(new {Status = "ok"})
                 : Ok(new { Status = "run" });

@@ -57,11 +57,7 @@ namespace GetPicturesFromDogCeo.WebServices.HostServices
 
         public bool StartEventExecute(DogsQueryViewModel dogsQueryViewModel, object sessionId = null)
         {
-            if (sessionId == null)
-            {
-                _executeAsyncNotify?.Invoke((dogsQueryViewModel, null));
-                return true;
-            }
+            sessionId ??= "default";
 
             if (_sessionsRun.ContainsKey(sessionId))
                 return false;
