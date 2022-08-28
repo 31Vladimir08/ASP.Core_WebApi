@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 
 using DogCeoService.EntitiesDto;
@@ -124,12 +125,13 @@ namespace DogCeoService.Services
 
         public IEnumerable<string> GetSelectedDogNames(List<string> breeds, List<string>? breedsFilter)
         {
-            if (breedsFilter == null || !breeds.Any())
+            if (breedsFilter == null || !breedsFilter.Any())
                 return breeds;
             var result = new List<string>();
             foreach (var item in breedsFilter)
             {
                 var r = breeds.Where(x => x.Trim().ToLower().Contains(item.Trim().ToLower()));
+
                 result.AddRange(r);
             }
 

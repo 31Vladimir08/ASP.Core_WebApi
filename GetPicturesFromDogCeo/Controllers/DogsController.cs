@@ -1,10 +1,6 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-using DogCeoService.Interfaces;
-
-using GetPicturesFromDogCeo.Interfaces.WebServices;
+﻿using GetPicturesFromDogCeo.Interfaces.WebServices;
 using GetPicturesFromDogCeo.ViewModels;
+using GetPicturesFromDogCeo.WebServices.HostServices;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +11,12 @@ namespace GetPicturesFromDogCeo.Controllers
     public class DogsController : ControllerBase
     {
         private readonly IDogWebService _dogWebService;
+        private readonly DogWebHostService _dogWebHostService;
 
-        public DogsController(IDogWebService dogWebService)
+        public DogsController(IDogWebService dogWebService, DogWebHostService dogWebHostService)
         {
             _dogWebService = dogWebService;
+            _dogWebHostService = dogWebHostService;
         }
 
         [HttpPost]
@@ -28,10 +26,11 @@ namespace GetPicturesFromDogCeo.Controllers
             {
                 return BadRequest();
             }
-
-            _dogWebService.GetDogsAsync(dogsQueryViewModel.Count, new CancellationTokenSource().Token, dogsQueryViewModel.Breads);
-
-            return Ok(new { Status = "run" });
+            int i = 1;
+            var isRun = _dogWebHostService.StartEventExecute(dogsQueryViewModel, null);
+            return isRun
+                ? Ok(new {Status = "ok"})
+                : Ok(new { Status = "run" });
         }
     }
 }
