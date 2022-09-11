@@ -3,6 +3,7 @@ using System;
 using GetPicturesFromDogCeo.DependencyInjection;
 using GetPicturesFromDogCeo.Filters;
 using GetPicturesFromDogCeo.WebServices;
+using GetPicturesFromDogCeo.WebServices.HostServices;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,11 +28,19 @@ namespace GetPicturesFromDogCeo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.SetServicesDJ();
+            services.SetServicesDJ();            
+            services.AddHostedService(provider => provider.GetService<DogWebHostService>());
+            services.AddHostedService<DogWebHostService>();
+
             services.AddControllers();
 
             services.AddDistributedMemoryCache();
-            services.AddSession();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             services.AddMvc().AddMvcOptions(options =>
             {
@@ -68,13 +77,14 @@ namespace GetPicturesFromDogCeo
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GetPicturesFromDogCeo v1"));
             }
 
-            app.UseSession();
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

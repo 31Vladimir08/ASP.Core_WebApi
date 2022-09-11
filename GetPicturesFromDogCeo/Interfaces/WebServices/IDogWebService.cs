@@ -32,10 +32,5 @@ namespace GetPicturesFromDogCeo.Interfaces.WebServices
         /// <param name="breedsFilter">список пород, по которым нужно получить изображения, если null, получаем по всем породам</param>
         /// <returns>список пород с картинками и ссылками</returns>
         Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBread, CancellationToken token, List<string> breedsFilter = null);
-
-        /// <summary>
-        /// Событие, информирующее о том, когда сервис начал работу и когда закончил.
-        /// </summary>
-        public event Action<bool> IsServiceWorksNotify;
     }
 }

@@ -32,8 +32,6 @@ namespace GetPicturesFromDogCeo.WebServices
             _dogService = dogService;
         }
 
-        public event Action<bool> IsServiceWorksNotify;
-
         public async Task AddDogsToCachAsync(IEnumerable<DogDto> dogs)
         {
             if (dogs == null || !dogs.Any())
@@ -58,11 +56,9 @@ namespace GetPicturesFromDogCeo.WebServices
 
         public async Task<IEnumerable<DogDto>> GetDogsAsync(int countPicturesEveryBread, CancellationToken token, List<string> breedsFilter = null)
         {
-            IsServiceWorksNotify?.Invoke(true);
             _dogService.LogNotify += (x) => _loger.LogInformation(x);
             var dogs = await _dogService.GetDogsAsync(countPicturesEveryBread, token, breedsFilter);
             await AddDogsToCachAsync(dogs);
-            IsServiceWorksNotify?.Invoke(false);
             return dogs;
         }
 
