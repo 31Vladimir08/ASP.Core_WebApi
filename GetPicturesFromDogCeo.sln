@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DogCeoService", "DogCeoServ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fibonacci", "Fibonacci\Fibonacci.csproj", "{455B57AE-FE65-4200-8B7D-9A3BC46F2EA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi", "ProductApi\ProductApi.csproj", "{F94554CE-DE11-497A-AA93-9E2133B07F88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductApi", "ProductApi\ProductApi.csproj", "{F94554CE-DE11-497A-AA93-9E2133B07F88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductCategoryApi", "ProductCategoryApi\ProductCategoryApi.csproj", "{E1BFEFC2-BDF2-48F3-86AC-912001C8E933}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductCategoryApi", "ProductCategoryApi\ProductCategoryApi.csproj", "{E1BFEFC2-BDF2-48F3-86AC-912001C8E933}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PictureApi", "PictureApi\PictureApi.csproj", "{43771AEE-A9EE-4C5C-9EBD-6F24EC23E2A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{E1BFEFC2-BDF2-48F3-86AC-912001C8E933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1BFEFC2-BDF2-48F3-86AC-912001C8E933}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1BFEFC2-BDF2-48F3-86AC-912001C8E933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43771AEE-A9EE-4C5C-9EBD-6F24EC23E2A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43771AEE-A9EE-4C5C-9EBD-6F24EC23E2A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43771AEE-A9EE-4C5C-9EBD-6F24EC23E2A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43771AEE-A9EE-4C5C-9EBD-6F24EC23E2A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

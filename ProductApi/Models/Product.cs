@@ -30,9 +30,6 @@ namespace ProductApi.Models
         [BsonElement("discontinued")]
         public bool? Discontinued { get; set; }
 
-        [BsonElement("supplierId")]
-        public string? SupplierId { get; set; }
-
         [BsonElement("categoryId")]
         public string? CategoryId { get; set; }
     }
