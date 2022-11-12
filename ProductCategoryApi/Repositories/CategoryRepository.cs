@@ -3,6 +3,7 @@
 using MongoDB.Driver;
 
 using ProductCategoryApi.Interfaces.Repositories;
+using ProductCategoryApi.Interfaces.Services;
 using ProductCategoryApi.Models;
 using ProductCategoryApi.Models.Settings;
 

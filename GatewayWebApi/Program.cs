@@ -1,6 +1,4 @@
-using MongoDB.Driver;
-using ProductApi.DependencyInjection;
-using ProductApi.Models.Settings;
+using GatewayWebApi.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,12 +8,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.Configure<ProductMongoDbSettings>(builder.Configuration.GetSection("ProductMongoDbSettings"));
-builder.Services.AddSingleton<IMongoClient>(x =>
-    new MongoClient(builder.Configuration.GetValue<string>("ProductMongoDbSettings:ConnectionString")));
-builder.Services.SetRepositoriesDJ();
+builder.Services.SetServicesDJ();
 builder.Services.SetAzureServiceBusDJ(builder.Configuration.GetValue<string>("AzureServiceBus:ServiceBusConnectionString"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
